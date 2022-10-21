@@ -37,15 +37,14 @@ class Chase(commands.Cog, name='Chase'):
     async def post_chase_pic(self, ctx, num=0, random=False):
         await ctx.typing()
         if len(self.all_pictures) == 0:
-            raise commands.BadArgument(f"No Chase pics available")
+            raise commands.BadArgument("No Chase pics available")
         if random:
             if not self.unseen_pictures:
                 self.unseen_pictures = list(range(len(self.all_pictures)))
             num = choice(self.unseen_pictures)
             self.unseen_pictures.remove(num)
-        else:
-            if not 0 <= num < len(self.all_pictures):
-                raise commands.BadArgument(f"Choose number from `0-{len(self.all_pictures)-1}`")
+        elif not 0 <= num < len(self.all_pictures):
+            raise commands.BadArgument(f"Choose number from `0-{len(self.all_pictures)-1}`")
         await ctx.send(f'Picture #{num}: {self.all_pictures[num]}')
 
     @commands.group(

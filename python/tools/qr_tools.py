@@ -127,10 +127,7 @@ class Polynomial_GF256_base(list):
                 # result polynomial at the correct position of the exponent of x
                 # To convert the coefficient to integer form we use the ALOG lookup table
                 result_polynomial_coefficients[x_exponent_sum] ^= ALOG[coefficient_product]
-        # This will generate the result polynomial in integer form in reversed order
-        # so before we return it, we reverse it and turn it back to exponent form.
-        res = Polynomial_GF256_int(reversed(result_polynomial_coefficients)).to_exp()
-        return res
+        return Polynomial_GF256_int(reversed(result_polynomial_coefficients)).to_exp()
 
     @property
     def degree(self):
@@ -178,10 +175,10 @@ class Polynomial_GF256_int(Polynomial_GF256_base):
 def get_matrix_str_full_size(matrix):
     border = '██'
     colors = ['██', '  ', '▒▒', '░░']
-    max_x = max([x for x, y in matrix.keys()])
-    min_x = min([x for x, y in matrix.keys()])
-    max_y = max([y for x, y in matrix.keys()])
-    min_y = min([y for x, y in matrix.keys()])
+    max_x = max(x for x, y in matrix.keys())
+    min_x = min(x for x, y in matrix.keys())
+    max_y = max(y for x, y in matrix.keys())
+    min_y = min(y for x, y in matrix.keys())
     res = ''
     res += border*(max_x+3) + '\n'
     for y in range(min_y, max_y+1):
@@ -199,10 +196,10 @@ def get_matrix_str_half_size(matrix):
     full = '█'
     empty = ' '
     colors = [[full, top], [bottom, empty]]
-    max_x = max([x for x, y in matrix.keys()])
-    min_x = min([x for x, y in matrix.keys()])
-    max_y = max([y for x, y in matrix.keys()])
-    min_y = min([y for x, y in matrix.keys()])
+    max_x = max(x for x, y in matrix.keys())
+    min_x = min(x for x, y in matrix.keys())
+    max_y = max(y for x, y in matrix.keys())
+    min_y = min(y for x, y in matrix.keys())
     res = ''
     res += bottom*(max_x+3) + '\n'
     for y in range(min_y, max_y+1, 2):
@@ -215,10 +212,10 @@ def get_matrix_str_half_size(matrix):
 
 
 def get_matrix_png(matrix, module_width_px=10):
-    max_x = max([x for x, y in matrix.keys()])
-    min_x = min([x for x, y in matrix.keys()])
-    max_y = max([y for x, y in matrix.keys()])
-    min_y = min([y for x, y in matrix.keys()])
+    max_x = max(x for x, y in matrix.keys())
+    min_x = min(x for x, y in matrix.keys())
+    max_y = max(y for x, y in matrix.keys())
+    min_y = min(y for x, y in matrix.keys())
 
     img = Image.new('RGB', (module_width_px * (max_x-min_x+3), module_width_px * (max_y-min_y+3)))
     # Top Border

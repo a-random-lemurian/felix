@@ -32,9 +32,9 @@ class Stats(commands.Cog, name='Stats'):
 
     def load_stats(self):
         state = self.load_state()
-        stats = state.get('stats', dict())
+        stats = state.get('stats', {})
         if not isinstance(stats, dict):
-            stats = dict()
+            stats = {}
         return stats
 
     def save_stats(self, stats):
@@ -102,19 +102,16 @@ class Stats(commands.Cog, name='Stats'):
             f'\nYouTube videos:  [{vids}] ',
             f'{"+ " if vids_diff > 0 else ""}',
             f'{str(vids_diff).replace("-", "- ") * bool(vids_diff)}',
-            f'\nYouTube views:   [{views}] '
-            f'{"+ " if views_diff > 0 else ""}',
+            f'\nYouTube views:   [{views}] {"+ " if views_diff > 0 else ""}',
             f'{str(views_diff).replace("-", "- ") * bool(views_diff)}',
-            '\n\nPiston stats:'
-            f'\nIRunCode calls/day: [{piston_bot_count}] '
-            f'{"+ " if bot_diff > 0 else ""}',
+            f'\n\nPiston stats:\nIRunCode calls/day: [{piston_bot_count}] {"+ " if bot_diff > 0 else ""}',
             f'{str(bot_diff).replace("-", "- ") * bool(bot_diff)}',
-            f'\nTotal calls/day:    [{piston_count}] '
-            f'{"+ " if piston_diff > 0 else ""}',
+            f'\nTotal calls/day:    [{piston_count}] {"+ " if piston_diff > 0 else ""}',
             f'{str(piston_diff).replace("-", "- ") * bool(piston_diff)}',
-            f'````last run: ',
-            f'{(str(time_diff) + " minutes ago") if time_diff >= 0 else "N/A"}`'
+            '````last run: ',
+            f'{f"{time_diff} minutes ago" if time_diff >= 0 else "N/A"}`',
         ]
+
         await ctx.send(''.join(response))
 
     @stats.command()
@@ -134,7 +131,7 @@ class Stats(commands.Cog, name='Stats'):
         async with self.client.session.get(url, params=params) as response:
             res = await response.json()
 
-        padding = max([len(i['user']) for i in res])
+        padding = max(len(i['user']) for i in res)
 
         formatted = [
             i['user'].ljust(padding + 2) + str(i['messages']) for i in res
@@ -165,7 +162,7 @@ class Stats(commands.Cog, name='Stats'):
         async with self.client.session.get(url, params=params) as response:
             res = await response.json()
 
-        padding = max([len(i['channel']) for i in res])
+        padding = max(len(i['channel']) for i in res)
 
         formatted = [
             i['channel'].ljust(padding + 2) + str(i['messages']) for i in res

@@ -53,8 +53,7 @@ class Superuser(commands.Cog, name='Superuser'):
             return await ctx.send(str(e))
 
         _cogs = [f'cogs.{i}' for i in self.cog_re.findall(output)]
-        active_cogs = [i for i in _cogs if i in self.client.extensions]
-        if active_cogs:
+        if active_cogs := [i for i in _cogs if i in self.client.extensions]:
             for cog_name in active_cogs:
                 await ctx.invoke(self.client.get_command('reload'), cog_name)
 
@@ -66,7 +65,7 @@ class Superuser(commands.Cog, name='Superuser'):
     )
     async def reset(self, ctx, n: int):
         """Reset repo to HEAD~[n]"""
-        if not n > 0:
+        if n <= 0:
             raise commands.BadArgument('Please specify n>0')
         await ctx.typing()
         try:

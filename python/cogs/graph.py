@@ -18,11 +18,7 @@ import matplotlib.pyplot as plt
 
 
 def clamp(value: int, low: int, high: int):
-    if value < low:
-        return low
-    if value > high:
-        return high
-    return value
+    return low if value < low else min(value, high)
 
 
 class Graph(commands.Cog,
@@ -85,11 +81,7 @@ class Graph(commands.Cog,
             retrieved_users = {x['discord_id']: x for x in api_data}
 
             for uid, data in graph_data.items():
-                if data:
-                    current_msg = data[-1][1]
-                else:
-                    current_msg = 0
-
+                current_msg = data[-1][1] if data else 0
                 if uid not in retrieved_users:
                     new_messages = current_msg
                 else:
@@ -100,7 +92,7 @@ class Graph(commands.Cog,
                 data.append([i+1, new_messages])
 
 
-        if all([not x for x in graph_data.values()]):
+        if not any(graph_data.values()):
             return False
 
 
@@ -108,7 +100,7 @@ class Graph(commands.Cog,
             xaxis = [i[0] for i in data]
             yaxis = [i[1] for i in data]
 
-            templabel = '{} {}'.format(user_names[uid][:-5], num_messages[uid])
+            templabel = f'{user_names[uid][:-5]} {num_messages[uid]}'
             plt.plot(xaxis, yaxis, label=templabel, marker='o', markersize=3)
 
         plt.legend()

@@ -69,24 +69,30 @@ class General(commands.Cog, name='General'):
 
     async def gif_url(self, terms):
         url = (
-            f'http://api.giphy.com/v1/gifs/search'
-            + f'?api_key={self.client.config["giphy_key"]}'
-            + f'&q={terms}'
-            + f'&limit=20'
-            + f'&rating=R'
-            + f'&lang=en'
-        )
+            (
+                (
+                    f'http://api.giphy.com/v1/gifs/search?api_key={self.client.config["giphy_key"]}'
+                    + f'&q={terms}'
+                )
+                + '&limit=20'
+            )
+            + '&rating=R'
+        ) + '&lang=en'
+
         async with self.client.session.get(url) as response:
             gifs = await response.json()
         if 'data' not in gifs:
-            if 'message' in gifs:
-                if 'Invalid authentication credentials' in gifs['message']:
-                    print('ERROR: Giphy API key is not valid')
+            if (
+                'message' in gifs
+                and 'Invalid authentication credentials' in gifs['message']
+            ):
+                print('ERROR: Giphy API key is not valid')
             return None
-        if not gifs['data']:
-            return None
-        gif = random.choice(gifs['data'])['images']['original']['url']
-        return gif
+        return (
+            random.choice(gifs['data'])['images']['original']['url']
+            if gifs['data']
+            else None
+        )
 
     async def duck_call(self, ctx, query=None):
 
@@ -449,34 +455,29 @@ class General(commands.Cog, name='General'):
         embed = Embed(color=0x2ECC71)
         embed.set_author(name='Frequently Asked Questions')
         questions = {
-            'What do you do professionally?':
-                'In addition to YouTube, Engineer Man works on various client '
-                'projects and oversees several projects.',
-            'How long have you been programming?':
-                'About ' + str(dt.now().year - 1994) + ' years',
-            'What distro and editor do you use?':
-                'Distro: Xubuntu, Editor: Atom',
-            'I want to get into programming, how should I get started?':
-                'First, figure out what sort of programming interests you, '
-                'such as web, desktop, game, systems, etc. '
-                'From there, choose a language that relates to that area and '
-                'begin reviewing documentation, reading tutorials, and '
-                'watching videos. Finally, start creating your own projects.',
-            'What is the best way to learn Language X':
-                'Most languages are similar in the types of things they '
-                'accomplish, where they differ is in how they accomplish them. '
-                'If you\'re new to programming, it\'s important to learn '
-                'syntax first. After that, learning that language\'s standard '
-                'library is a good use of time. Beyond that, it\'s just '
-                'experimenting with the language and working on projects in '
-                'that language.',
-            'How can I stay focused/prevent burn out?':
-                'The best way is to try to finish something, anything, even '
-                'if it\'s not as complete as you want. Finishing things is '
-                'satisfying, and once you do you\'ll be more motivated to '
-                'improve what you have. Allowing a project to drone on '
-                'forever without finishing is a way to get bored with it.'
+            'What do you do professionally?': 'In addition to YouTube, Engineer Man works on various client '
+            'projects and oversees several projects.',
+            'How long have you been programming?': f'About {str(dt.now().year - 1994)} years',
+            'What distro and editor do you use?': 'Distro: Xubuntu, Editor: Atom',
+            'I want to get into programming, how should I get started?': 'First, figure out what sort of programming interests you, '
+            'such as web, desktop, game, systems, etc. '
+            'From there, choose a language that relates to that area and '
+            'begin reviewing documentation, reading tutorials, and '
+            'watching videos. Finally, start creating your own projects.',
+            'What is the best way to learn Language X': 'Most languages are similar in the types of things they '
+            'accomplish, where they differ is in how they accomplish them. '
+            'If you\'re new to programming, it\'s important to learn '
+            'syntax first. After that, learning that language\'s standard '
+            'library is a good use of time. Beyond that, it\'s just '
+            'experimenting with the language and working on projects in '
+            'that language.',
+            'How can I stay focused/prevent burn out?': 'The best way is to try to finish something, anything, even '
+            'if it\'s not as complete as you want. Finishing things is '
+            'satisfying, and once you do you\'ll be more motivated to '
+            'improve what you have. Allowing a project to drone on '
+            'forever without finishing is a way to get bored with it.',
         }
+
         for question, answer in questions.items():
             embed.add_field(
                 name=question,
@@ -540,7 +541,7 @@ class General(commands.Cog, name='General'):
     )
     async def oldest(self, ctx):
         """Get the oldest Discord account on the Server"""
-        oldst = min([x for x in ctx.guild.members], key=lambda y: y.created_at)
+        oldst = min(list(ctx.guild.members), key=lambda y: y.created_at)
         await ctx.send(
             'Oldest Discord account on this Server:\n'
             f'`{str(oldst)} created {oldst.created_at}`'
@@ -555,14 +556,14 @@ class General(commands.Cog, name='General'):
         """Ask Felix a question"""
         await ctx.typing()
         url = 'https://api.wolframalpha.com/v1/result?i=' + \
-            f'{quote_plus(question)}&appid={self.client.config["wolfram_key"]}'
+                f'{quote_plus(question)}&appid={self.client.config["wolfram_key"]}'
         async with self.client.session.get(url) as response:
             answer = await response.text()
         if 'did not understand' in answer or 'No short answer' in answer:
             await self.duck_call(ctx, question)
             return
         if len(answer) > 1990:
-            answer = answer[:1990] + ' ...'
+            answer = f'{answer[:1990]} ...'
         await ctx.send(answer)
     # ------------------------------------------------------------------------
 
@@ -582,7 +583,7 @@ class General(commands.Cog, name='General'):
         definition = answer["list"][0]["definition"]
         example = answer["list"][0]["example"]
         if len(definition + example) > 1950:
-            definition = definition[:1950 - len(example)] + ' (...)'
+            definition = f'{definition[:1950 - len(example)]} (...)'
         response = (
             '\n**Definition:**\n'
             f'{definition}\n'
@@ -612,38 +613,36 @@ class General(commands.Cog, name='General'):
 
         while True:
             url = 'https://www.googleapis.com/youtube/v3/search' +\
-                '?key=' + self.client.config['yt_key'] +\
-                '&channelId=UCrUL8K81R4VBzm-KOYwrcxQ' +\
-                '&part=snippet,id' +\
-                '&order=date' +\
-                '&maxResults=50'
+                    '?key=' + self.client.config['yt_key'] +\
+                    '&channelId=UCrUL8K81R4VBzm-KOYwrcxQ' +\
+                    '&part=snippet,id' +\
+                    '&order=date' +\
+                    '&maxResults=50'
 
             if page_token:
-                url += '&pageToken=' + page_token
+                url += f'&pageToken={page_token}'
 
             async with self.client.session.get(url) as response:
                 videos = await response.json()
 
-            for video in videos['items']:
-                if 'youtube#video' not in video['id']['kind']:
-                    continue
-                video_list.append({
-                    'id': video['id']['videoId'],
-                    'title': video['snippet']['title']
-                })
+            video_list.extend(
+                {'id': video['id']['videoId'], 'title': video['snippet']['title']}
+                for video in videos['items']
+                if 'youtube#video' in video['id']['kind']
+            )
 
             if 'nextPageToken' not in videos:
                 break
 
             page_token = videos['nextPageToken']
 
-        to_send = [v for v in video_list if all(
-            keyword in v['title'].lower() for keyword in term.lower().split())]
-
-        if not to_send:
-            response = 'Sorry, no videos found for: ' + term
-            await ctx.send(response)
-        else:
+        if to_send := [
+            v
+            for v in video_list
+            if all(
+                keyword in v['title'].lower() for keyword in term.lower().split()
+            )
+        ]:
             to_send = to_send[:5]
             description = [
                 f'[{v["title"]}](https://www.youtube.com/watch?v={v["id"]})' for v in to_send]
@@ -653,6 +652,9 @@ class General(commands.Cog, name='General'):
                 description=description
             )
             await ctx.send(embed=e)
+        else:
+            response = f'Sorry, no videos found for: {term}'
+            await ctx.send(response)
 
     # ------------------------------------------------------------------------
 
@@ -696,7 +698,7 @@ class General(commands.Cog, name='General'):
             weather = await response.text()
             weather = weather.split('\n')
         if len(weather) < 8:
-            weather = f'the weather api returned an invalid response, try again later'
+            weather = 'the weather api returned an invalid response, try again later'
             await ctx.send(weather)
             return
         if 'Sorry' in weather[0] or (weather[1] and not moon):
@@ -731,7 +733,7 @@ class General(commands.Cog, name='General'):
         sanitized = sauce.replace('`', '\u200B`')
         if len(url) + len(sanitized) > 1950:
             sanitized = sanitized[:1950-len(url)] + '\n[...]'
-        await ctx.send(url + f'```python\n{sanitized}\n```')
+        await ctx.send(f'{url}```python\n{sanitized}\n```')
 
     @commands.command(
         name='run'
@@ -763,13 +765,12 @@ class General(commands.Cog, name='General'):
 
         if code is None:
             code = random.choice(self.http_codes)
-        else:
-            if code not in self.http_codes:
-                raise commands.BadArgument(f'Invalid status code: **{code}**')
+        elif code not in self.http_codes:
+            raise commands.BadArgument(f'Invalid status code: **{code}**')
 
         embed = Embed()
         embed.set_image(url=f'https://http.cat/{code}.jpg')
-        embed.set_footer(text=f'Provided by: https://http.cat')
+        embed.set_footer(text='Provided by: https://http.cat')
         await ctx.send(embed=embed)
 
     @commands.command(
@@ -784,13 +785,12 @@ class General(commands.Cog, name='General'):
 
         if code is None:
             code = random.choice(self.http_codes_dog)
-        else:
-            if code not in self.http_codes_dog:
-                raise commands.BadArgument(f'Invalid status code: **{code}**')
+        elif code not in self.http_codes_dog:
+            raise commands.BadArgument(f'Invalid status code: **{code}**')
 
         embed = Embed()
         embed.set_image(url=f'https://httpstatusdogs.com/img/{code}.jpg')
-        embed.set_footer(text=f'Provided by: https://httpstatusdogs.com/')
+        embed.set_footer(text='Provided by: https://httpstatusdogs.com/')
         await ctx.send(embed=embed)
 
     # ------------------------------------------------------------------------
@@ -805,7 +805,7 @@ class General(commands.Cog, name='General'):
         if '-' not in date and date.isnumeric() and len(date) == 8:
             date = '-'.join((date[:4], date[4:6], date[6:8]))
 
-        elif date == 'r' or date == 'random':
+        elif date in {'r', 'random'}:
             start_date = dt.strptime('1995-06-16', '%Y-%m-%d')
             end_date = dt.now()
             date = str(start_date + td(

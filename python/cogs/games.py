@@ -53,17 +53,10 @@ class Connect4Engine:
     def _apply_move(self, player, column):
         next_empty = self._find_next_empty(column)
         self._state[next_empty] = 1 if player == self._player1 else 2
-        winning_move = self._check_4_in_a_row(next_empty)
-        if winning_move:
-            if player == self._player1:
-                return self.PLAYER1_WINNER
-            else:
-                return self.PLAYER2_WINNER
+        if winning_move := self._check_4_in_a_row(next_empty):
+            return self.PLAYER1_WINNER if player == self._player1 else self.PLAYER2_WINNER
         else:
-            if self._state.count(0) == 0:
-                return self.DRAW
-            else:
-                return self.MOVE_ACCEPTED
+            return self.DRAW if self._state.count(0) == 0 else self.MOVE_ACCEPTED
 
     def _check_4_in_a_row(self, last_added):
         target_value = self._state[last_added]
@@ -83,7 +76,7 @@ class Connect4Engine:
             -8: min(space_up, space_left),
         }
 
-        in_a_row = dict()
+        in_a_row = {}
         for direction, distance in directions.items():
             distance = min(distance, 3)
             current = last_added
@@ -98,11 +91,7 @@ class Connect4Engine:
 
     def _find_next_empty(self, column):
         current = column - 1
-        while True:
-            if current + 7 > 41:
-                break
-            if self._state[current + 7]:
-                break
+        while current <= 34 and not self._state[current + 7]:
             current += 7
         return current
 
@@ -158,8 +147,8 @@ class Connect4Game(Connect4Engine):
 class Connect4(commands.Cog, name='Connect4'):
     def __init__(self, client):
         self.client = client
-        self.waiting_games = dict()
-        self.active_games = dict()
+        self.waiting_games = {}
+        self.active_games = {}
 
     async def start_invite(self, ctx):
         await ctx.message.delete()
@@ -178,7 +167,7 @@ class Connect4(commands.Cog, name='Connect4'):
         await message.clear_reaction(token)
         content = message.content.split('\n')[0]
         await message.edit(
-            content=content + f' - They have chosen {token}\nPick a color to join'
+            content=f'{content} - They have chosen {token}\nPick a color to join'
         )
 
     async def start_game(
@@ -244,9 +233,12 @@ class Connect4(commands.Cog, name='Connect4'):
                 if emoji == CANCEL_EMOJI:
                     await self.cancel_invite(message)
                     return
-                if emoji not in BOARD_EMOJI and isinstance(emoji, str):
-                    if p1_token is None:
-                        await self.p1_token_pick(message, emoji)
+                if (
+                    emoji not in BOARD_EMOJI
+                    and isinstance(emoji, str)
+                    and p1_token is None
+                ):
+                    await self.p1_token_pick(message, emoji)
 
             elif p1_token:
                 emoji = reaction.emoji
@@ -325,22 +317,20 @@ class HangmanGame:
             return self.completed(won=False)
         if not g.isalpha():
             return self.invalid(alpha=False)
-        if len(g) == 1:
-            return self.letter(g)
-        return self.word(g)
+        return self.letter(g) if len(g) == 1 else self.word(g)
 
     def letter(self, l):
         if l in self.correct + self.incorrect:
             return self.invalid()
         if l in self._word:
             self.correct.append(l)
-            return self.state()
         else:
             self.incorrect.append(l)
             self.tries -= 1
             if self.tries <= 0:
                 return self.completed(won=False)
-            return self.state()
+
+        return self.state()
 
     def word(self, w):
         if w == self._word:
@@ -348,20 +338,17 @@ class HangmanGame:
         return self.completed(won=False)
 
     def invalid(self, alpha=True):
-        if not alpha:
-            description = "Words contain only alphabetic characters"
-        else:
-            description = "You already tried that letter"
-        embed = Embed(
-            title="Oops",
-            description=description,
-            color=self.color
+        description = (
+            "You already tried that letter"
+            if alpha
+            else "Words contain only alphabetic characters"
         )
-        return embed
+
+        return Embed(title="Oops", description=description, color=self.color)
 
     def state(self):
         puzzle = [i if i in self.correct else "_" for i in self._word]
-        if not any(i == "_" for i in puzzle):
+        if "_" not in puzzle:
             return self.completed(won=True)
         description = (
             f"Your word is: `{' '.join(puzzle)}`\n"
@@ -393,12 +380,11 @@ class HangmanGame:
     def completed(self, won=False):
         self._is_complete = True
         title = "Nice! You won!" if won else "Aww, you lost"
-        embed = Embed(
+        return Embed(
             title=title,
             description=f"The word was: ||{self._word.title()}||",
-            color=self.color
+            color=self.color,
         )
-        return embed
 
 
 class Hangman(commands.Cog):
@@ -424,8 +410,7 @@ class Hangman(commands.Cog):
         if ' ' in message.content:
             return
         _id = message.author.id
-        game = self.active_games.get(_id)
-        if game:
+        if game := self.active_games.get(_id):
             if game.channel.id != message.channel.id:
                 return
             if game.last_bot_message:
@@ -445,8 +430,7 @@ class Hangman(commands.Cog):
     async def _hangman(self, ctx):
         """Starts a game of hangman"""
         author = ctx.author
-        game = self.active_games.get(author.id)
-        if game:
+        if game := self.active_games.get(author.id):
             if game.last_bot_message:
                 await game.last_bot_message.delete()
                 game.last_bot_message = None
@@ -523,7 +507,7 @@ class MMGame():
 
     def add_guess(self, guess):
         guess = guess.replace(' ', '')
-        if not len(guess) == self.difficulty:
+        if len(guess) != self.difficulty:
             raise commands.CommandError(
                 f'Please provide {self.difficulty} colors')
         if any(x.lower() not in MMGame.COLORS for x in guess):
@@ -532,7 +516,7 @@ class MMGame():
         return True
 
     def update_referee(self):
-        if not len(self.game) == len(self.referee) + 1:
+        if len(self.game) != len(self.referee) + 1:
             return False
         solution = self.solution.copy()
         guess = self.game[-1].copy()
@@ -555,8 +539,8 @@ class MMGame():
     async def process_game(self, ctx):
         self.add_guess(ctx.kwargs['guess'])
         self.update_referee()
-        loser = True if len(self.game) == 12 else False
-        winner = True if self.referee[-1][0] == self.difficulty else False
+        loser = len(self.game) == 12
+        winner = self.referee[-1][0] == self.difficulty
         if self.last_guess_message:
             await self.last_guess_message.delete()
         self.last_guess_message = ctx.message
@@ -566,16 +550,15 @@ class MMGame():
     async def print_to_ctx(self, ctx, heading=''):
         game_to_print = []
         for row, referee in zip(self.game, self.referee):
-            row_str = ''
-            for peg in row:
-                row_str += MMGame.PEGS[peg]
-            row_str += '|'
+            row_str = ''.join(MMGame.PEGS[peg] for peg in row) + '|'
             row_str += MMGame.REFEREE_PEGS[0] * referee[0]
             row_str += MMGame.REFEREE_PEGS[1] * referee[1]
             game_to_print.append(row_str)
-        to_send = []
-        for n, line in enumerate(game_to_print, start=1):
-            to_send.append(str(n).rjust(2) + ': ' + line)
+        to_send = [
+            f'{str(n).rjust(2)}: {line}'
+            for n, line in enumerate(game_to_print, start=1)
+        ]
+
         to_send = '```\n' + '\n'.join(to_send) + '```' if to_send else ''
         if self.last_game_message:
             await self.last_game_message.delete()
@@ -586,10 +569,7 @@ class MMGame():
         return True
 
     def get_solution(self):
-        solution_str = ''
-        for peg in self.solution:
-            solution_str += MMGame.PEGS[peg]
-        return solution_str
+        return ''.join(MMGame.PEGS[peg] for peg in self.solution)
 
 
 class Mastermind(commands.Cog, name='Mastermind'):
@@ -657,11 +637,10 @@ class Mastermind(commands.Cog, name='Mastermind'):
     )
     async def guess(self, ctx, *, guess):
         """Make a guess for your running mastermind game"""
-        current_game = None
-        for game in self.active_games:
-            if game.player == ctx.author:
-                current_game = game
-                break
+        current_game = next(
+            (game for game in self.active_games if game.player == ctx.author), None
+        )
+
         if not current_game:
             await ctx.send('Cannot find active game')
             return False
@@ -684,11 +663,10 @@ class Mastermind(commands.Cog, name='Mastermind'):
     )
     async def quit(self, ctx):
         """Quit your running mastermind game"""
-        current_game = None
-        for game in self.active_games:
-            if game.player == ctx.author:
-                current_game = game
-                break
+        current_game = next(
+            (game for game in self.active_games if game.player == ctx.author), None
+        )
+
         if not current_game:
             await ctx.send('Cannot find active game')
             return False

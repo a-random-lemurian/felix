@@ -52,9 +52,8 @@ class ActivityMgmt(commands.Cog, name='Activity Management'):
                 self.previous_activity = None
             return
 
-        bot_activity = self.client.main_guild.me.activity
-        if bot_activity:
-            if not self.previous_activity:
+        if not self.previous_activity:
+            if bot_activity := self.client.main_guild.me.activity:
                 self.previous_activity = bot_activity
 
         await self.set_activity(text=holiday)
@@ -82,10 +81,7 @@ class ActivityMgmt(commands.Cog, name='Activity Management'):
         _type = activities.index(_activity)
         if _type == 2 and text_split[0].lower() == 'to':
             del text_split[0]
-        if _type == 1:
-            _url = text_split.pop(0)
-        else:
-            _url = None
+        _url = text_split.pop(0) if _type == 1 else None
         _name = ' '.join(text_split)
         await self.client.change_presence(
             status=self.client.status,

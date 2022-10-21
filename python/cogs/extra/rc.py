@@ -35,9 +35,9 @@ class RemoteControl(commands.Cog, command_attrs=dict(hidden=True)):
         if msg.author.bot:
             return
         if msg.channel == self.rc_target_channel:
-            await self.rc_channel.send(msg.author.name + ':  ' + msg.content)
+            await self.rc_channel.send(f'{msg.author.name}:  {msg.content}')
         elif msg.channel == self.rc_channel:
-            if not msg.author == self.rc_user:
+            if msg.author != self.rc_user:
                 return
             if msg.content.startswith('felix'):
                 return
@@ -49,9 +49,9 @@ class RemoteControl(commands.Cog, command_attrs=dict(hidden=True)):
     async def on_typing(self, channel, user, when):
         if not self.rc_active:
             return
-        if not channel == self.rc_channel:
+        if channel != self.rc_channel:
             return
-        if not user == self.rc_user:
+        if user != self.rc_user:
             return
         await self.rc_target_channel.typing()
 
@@ -65,10 +65,9 @@ class RemoteControl(commands.Cog, command_attrs=dict(hidden=True)):
     )
     async def remote_control(self, ctx, target_channel: TextChannel = None):
         """Remote control felix in a channel"""
-        if self.rc_active:
-            if not ctx.author == self.rc_user:
-                await ctx.send(f'{self.rc_user.name} is currently using rc!')
-                return
+        if self.rc_active and ctx.author != self.rc_user:
+            await ctx.send(f'{self.rc_user.name} is currently using rc!')
+            return
         if not target_channel:
             await ctx.send('Error: Please specify a channel!')
             return
@@ -85,14 +84,14 @@ class RemoteControl(commands.Cog, command_attrs=dict(hidden=True)):
         """Stop the remote control"""
         if not self.rc_active:
             return
-        if not ctx.author == self.rc_user:
+        if ctx.author != self.rc_user:
             await ctx.send(f'{self.rc_user.name} is currently using rc!')
             return
         self.rc_target_channel = None
         self.rc_user = None
         self.rc_channel = None
         self.rc_active = False
-        await ctx.send(f'Remote Control Stopped!')
+        await ctx.send('Remote Control Stopped!')
 
 
 async def setup(client):

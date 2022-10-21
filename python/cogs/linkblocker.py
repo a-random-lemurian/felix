@@ -59,31 +59,33 @@ class LinkBlocker(commands.Cog, name='Link Blocker'):
         """return True if user is permitted to post links"""
         if msg.author == self.client.user:
             return True
-        if self.client.user_is_admin(msg.author):
-            return True
-        return False
+        return bool(self.client.user_is_admin(msg.author))
 
     async def has_discord_link(self, msg):
         """Check message and return True if a discord link was detected"""
-        if len(re.findall(r'(?i)(discord(app)?\.(gg|io|me|co|com\/invite)\/\S+)', msg.content)):
-            if msg.author.id in self.allowed_once:
-                self.allowed_once.remove(msg.author.id)
-                return False
-            else:
-                if str(msg.author.id) in self.naughty_list:
-                    last_time = self.naughty_list[str(msg.author.id)]
-                    if time.time() - last_time > self.NAUGHTY_LIST_TIME:
-                        self.naughty_list.pop(str(msg.author.id))
-                    else:
-                        return True
-                if not msg.author.bot:
-                    await msg.channel.send(
-                        f'Sorry {msg.author.mention}. ' +
-                        'Posting links to other servers is not allowed.'
-                    )
-                self.naughty_list[str(msg.author.id)] = time.time()
-            return True
-        return False
+        if not len(
+            re.findall(
+                r'(?i)(discord(app)?\.(gg|io|me|co|com\/invite)\/\S+)', msg.content
+            )
+        ):
+            return False
+        if msg.author.id in self.allowed_once:
+            self.allowed_once.remove(msg.author.id)
+            return False
+        else:
+            if str(msg.author.id) in self.naughty_list:
+                last_time = self.naughty_list[str(msg.author.id)]
+                if time.time() - last_time > self.NAUGHTY_LIST_TIME:
+                    self.naughty_list.pop(str(msg.author.id))
+                else:
+                    return True
+            if not msg.author.bot:
+                await msg.channel.send(
+                    f'Sorry {msg.author.mention}. ' +
+                    'Posting links to other servers is not allowed.'
+                )
+            self.naughty_list[str(msg.author.id)] = time.time()
+        return True
 
     async def has_forbidden_text(self, msg):
         """Check message and return True if forbidden text was detected"""
@@ -94,14 +96,18 @@ class LinkBlocker(commands.Cog, name='Link Blocker'):
             msg.content
         )):
             return True
-        if len(re.findall(
-            r'(?i)(http(s)?\:\/\/(www\.)?[^\s]+(' +
-            '|'.join([s.replace('.', '\\.') for s in FORBIDDEN_FILETYPES]) +
-            r'))\b',
-            msg.content
-        )):
-            return True
-        return False
+        return bool(
+            len(
+                re.findall(
+                    r'(?i)(http(s)?\:\/\/(www\.)?[^\s]+('
+                    + '|'.join(
+                        [s.replace('.', '\\.') for s in FORBIDDEN_FILETYPES]
+                    )
+                    + r'))\b',
+                    msg.content,
+                )
+            )
+        )
 
     async def has_forbidden_attachments(self, msg):
         """Check message and return True if forbidden attachments were detected"""
@@ -161,9 +167,7 @@ class LinkBlocker(commands.Cog, name='Link Blocker'):
             return True
         if await self.has_forbidden_text(my_msg):
             return True
-        if await self.has_forbidden_attachments(my_msg):
-            return True
-        return False
+        return bool(await self.has_forbidden_attachments(my_msg))
 
     # ----------------------------------------------
     # Event listeners

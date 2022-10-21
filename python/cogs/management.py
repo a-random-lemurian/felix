@@ -42,7 +42,7 @@ class Management(commands.Cog, name='Management'):
             activity_name = 'ERROR in cog'
             activity_type = 3
         else:
-            activity_name = f'boot sequence OK'
+            activity_name = 'boot sequence OK'
             activity_type = 1
         await self.client.change_presence(
             status=self.client.status,
@@ -76,10 +76,7 @@ class Management(commands.Cog, name='Management'):
         if isinstance(error, commands.MissingRequiredArgument):
             par = str(error.param)
             missing = par.split(": ")[0]
-            if ':' in par:
-                missing_type = ' (' + str(par).split(": ")[1] + ')'
-            else:
-                missing_type = ''
+            missing_type = ' (' + par.split(": ")[1] + ')' if ':' in par else ''
             await ctx.send(
                 f'Missing parameter: `{missing}{missing_type}`' +
                 f'\nIf you are not sure how to use the command, try running ' +
@@ -133,7 +130,7 @@ class Management(commands.Cog, name='Management'):
                 if ext == '.py':
                     dot_dir = directory.replace('\\', '.')
                     dot_dir = dot_dir.replace('/', '.')
-                    cogs.append(f'{dot_dir}.' + filename)
+                    cogs.append(f'{dot_dir}.{filename}')
         return cogs
 
     # ----------------------------------------------
@@ -196,8 +193,10 @@ class Management(commands.Cog, name='Management'):
     async def reload_extension(self, ctx, extension_name):
         target_extensions = []
         if extension_name == 'all':
-            target_extensions = [__name__] + \
-                [x for x in self.client.extensions if not x == __name__]
+            target_extensions = [__name__] + [
+                x for x in self.client.extensions if x != __name__
+            ]
+
         else:
             for cog_name in self.client.extensions:
                 if extension_name in cog_name:
@@ -258,10 +257,10 @@ class Management(commands.Cog, name='Management'):
         aka = {}
         pages = []
         usernames = [(x.name, x.display_name) for x in ctx.guild.members]
-        l_max = max([len(x[0]) for x in usernames]) + 1
+        l_max = max(len(x[0]) for x in usernames) + 1
         for name, display_name in usernames:
             name_count[name] = name_count.get(name, 0) + 1
-            if not name == display_name:
+            if name != display_name:
                 aka[name] = aka.get(name, []) + [display_name]
         page = []
         for key, value in sorted(name_count.items(),
@@ -375,7 +374,7 @@ class Management(commands.Cog, name='Management'):
             if i % NUM_ERRORS_PER_PAGE == NUM_ERRORS_PER_PAGE-1:
                 response.append('```')
                 await ctx.send('\n'.join(response))
-                response = [f'```css']
+                response = ['```css']
         if len(response) > 1:
             response.append('```')
             await ctx.send('\n'.join(response))
@@ -429,18 +428,20 @@ class Management(commands.Cog, name='Management'):
         if isinstance(error_source, commands.Context):
             guild = error_source.guild
             channel = error_source.channel
-            response_header.append(
-                f'`Server:{guild.name} | Channel: {channel.name}`' if guild else '`In DMChannel`'
+            response_header.extend(
+                (
+                    f'`Server:{guild.name} | Channel: {channel.name}`'
+                    if guild
+                    else '`In DMChannel`',
+                    f'`User: {error_source.author.name}#{error_source.author.discriminator}`',
+                    f'`Command: {error_source.invoked_with}`',
+                    error_source.message.jump_url,
+                )
             )
-            response_header.append(
-                f'`User: {error_source.author.name}#{error_source.author.discriminator}`'
-            )
-            response_header.append(f'`Command: {error_source.invoked_with}`')
-            response_header.append(error_source.message.jump_url)
+
             e = Embed(title='Full command that caused the error:',
                       description=orig_content)
-            avatar = error_source.author.avatar
-            if avatar:
+            if avatar := error_source.author.avatar:
                 e.set_footer(text=error_source.author.display_name, icon_url=avatar.url)
             else:
                 e.set_footer(text=error_source.author.display_name)
@@ -457,7 +458,7 @@ class Management(commands.Cog, name='Management'):
         to_send = '\n'.join(response_header) + '\n```python'
 
         for line in response_error:
-            if len(to_send) + len(line) + 1 > 1800:
+            if len(to_send) + len(line) > 1799:
                 await ctx.send(to_send + '\n```')
                 to_send = '```python'
             to_send += '\n' + line

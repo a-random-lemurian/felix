@@ -340,7 +340,7 @@ def generate_qr_code(data, ecl, output='half_str', png_pixel_size=10, verbose=Fa
     #   0 being a white module
     #   1 being a black module
     #   2 being a reserved module
-    matrix = dict()
+    matrix = {}
     # We initialize a set in which we will store the positions of the modules that have been
     # filled with our "final message" as we go along. We will need that list of positions later
     # to apply masks to the "data area".
@@ -527,7 +527,7 @@ def generate_qr_code(data, ecl, output='half_str', png_pixel_size=10, verbose=Fa
         downwards = ((-1, 0), (1, 1))
         while x >= 0:
             step = 0
-            while 0 <= y:
+            while y >= 0:
                 yield x, y
                 dx, dy = upwards[step]
                 step = (step+1) % 2
@@ -627,17 +627,6 @@ def generate_qr_code(data, ecl, output='half_str', png_pixel_size=10, verbose=Fa
             if matrix_candidate[8, y] == 2:
                 matrix_candidate[8, y] = next(to_write)
 
-        ####################         ##################
-        #████████████████  #         #██              #
-        #              ██ 6#         #██  ██████████  #
-        #  ██████████  ██ 5#         #██  ██      ██  #
-        #  ██      ██  ██ 4#         #██  ██      ██  #
-        #  ██      ██  ██ 3#         #██  ██      ██  #
-        #  ██      ██  ██ 2#         #██  ██████████  #
-        #  ██████████  ██ 1#         #██              #
-        #              ██ 0#         #████████████████#
-        ####################         #7 8 9 1011121314#
-                ##################
         to_write = map(int, format_information_string)
         for y in range(size-1, size-8, -1):
             if matrix_candidate[8, y] == 2:
@@ -709,7 +698,7 @@ def generate_qr_code(data, ecl, output='half_str', png_pixel_size=10, verbose=Fa
         # timing patterns, separators)
         # Do not mask reserved areas (format information area, version information area)
         # Here we use the matrix_data_area set from before to check if the mask should be applied
-        masked_matrix = dict()
+        masked_matrix = {}
         mask_f = masks[mask]
         for k, v in matrix_candidate.items():
             if k in matrix_data_area:

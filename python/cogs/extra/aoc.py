@@ -63,17 +63,19 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
         msg = []
         for member_id, data in current_members.items():
             if member_id not in self.members:
-                msg.append((
-                    0,
-                    f"#{data['name'].replace(' ','_')} " +
-                    "has just joined the leaderboard."
-                ))
+                msg.append(
+                    (
+                        0,
+                        f"#{data['name'].replace(' ', '_')} has just joined the leaderboard.",
+                    )
+                )
+
                 continue
             if data['stars'] == self.members[member_id]['stars']:
                 continue
-            new_stats = data['completion_day_level']
             old_stats = self.members[member_id]['completion_day_level']
             current_stats = set()
+            new_stats = data['completion_day_level']
             for k, v in new_stats.items():
                 for s in v.keys():
                     current_stats.add(f'{k}-{s}')
@@ -116,10 +118,10 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
     async def aoc(self, ctx, day: int):
         """Show Advent of Code stats for a specific day
         (only works in #advent-of-code)"""
-        if not 1 <= int(day) <= datetime.now().day:
+        if not 1 <= day <= datetime.now().day:
             return
         day = str(day)
-        if not ctx.channel.id == AOC_CHANNEL:
+        if ctx.channel.id != AOC_CHANNEL:
             return
 
         # Delete previous message
@@ -142,11 +144,10 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
             return
         day1_times = {}
         for p in '12':
-            paginator = []
             current = parts[p]
             if not current:
                 continue
-            paginator.append(f'Advent of Code puzzle [{day}]|[{p}]')
+            paginator = [f'Advent of Code puzzle [{day}]|[{p}]']
             first_time = 0
             for rank, entry in enumerate(sorted(current.items(), key=lambda x: x[1])):
                 name, time = entry[0], int(entry[1])
@@ -176,7 +177,7 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
 
             subs = [paginator[x:x+21] for x in range(0, len(paginator), 21)]
             for sub_paginator in subs:
-                sub_paginator.insert(0, f'```css')
+                sub_paginator.insert(0, '```css')
                 sub_paginator.append('```')
                 msg = await ctx.send('\n'.join(sub_paginator))
                 self.last_msgs.append(msg)
@@ -187,7 +188,7 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
         aliases=['how-to', 'help', 'faq'],
     )
     async def aoc_help(self, ctx):
-        if not ctx.channel.id == AOC_CHANNEL:
+        if ctx.channel.id != AOC_CHANNEL:
             return
         text = """
         **Introduction**

@@ -51,11 +51,11 @@ class Talkback(commands.Cog, command_attrs=dict(hidden=True)):
             if new_mode >= len(self.modes):
                 raise commands.BadArgument('Invalid mode')
             selected, self.mode = [*self.modes.items()][new_mode]
-        else:
-            if new_mode not in self.modes:
-                raise commands.BadArgument('Invalid mode')
+        elif new_mode in self.modes:
             selected, self.mode = new_mode, self.modes[new_mode]
 
+        else:
+            raise commands.BadArgument('Invalid mode')
         await ctx.send(f'Changed talkback mode to {selected}')
 
 

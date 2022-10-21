@@ -22,8 +22,8 @@ class Stream(commands.Cog, name='Stream'):
         self.questions_ch = None
         self.donations_ch = None
         self.PREFIXES = ['q ', 'question ', 'q:', 'question:']
-        self.staged_questions = dict()
-        self.forwarded_questions = dict()
+        self.staged_questions = {}
+        self.forwarded_questions = {}
         self.reaction_in_progress = set()
         self.youtube_api = None
         self.check_date = datetime.fromisoformat('2021-01-01T00:00:00.000000+00:00')
@@ -214,7 +214,7 @@ class Stream(commands.Cog, name='Stream'):
                 timeout=120
             )
         except asyncio.TimeoutError:
-            await channel.send(f'TIMEOUT - Authentication Cancelled')
+            await channel.send('TIMEOUT - Authentication Cancelled')
             return
         code = code_msg.content
         flow.fetch_token(code=code)
@@ -257,7 +257,7 @@ class Stream(commands.Cog, name='Stream'):
             )
 
         except asyncio.TimeoutError:
-            await channel.send(f'TIMEOUT - Setup Cancelled')
+            await channel.send('TIMEOUT - Setup Cancelled')
             return
 
         staging_id = int(staging_msg.content)
@@ -328,7 +328,7 @@ class Stream(commands.Cog, name='Stream'):
         chat_messages = response['items']
         for msg in chat_messages:
             msg_type = msg['snippet']['type']
-            if not msg_type in ('textMessageEvent', 'superChatEvent'):
+            if msg_type not in ('textMessageEvent', 'superChatEvent'):
                 continue
             message_date_str = msg['snippet']['publishedAt']
             message_date = datetime.fromisoformat(message_date_str)
@@ -342,10 +342,10 @@ class Stream(commands.Cog, name='Stream'):
             if msg_type == 'superChatEvent':
                 amount = int(msg['snippet']['superChatDetails']['amountMicros']) / 1000000
                 currency = msg['snippet']['superChatDetails']['currency']
-                if not currency == 'USD':
+                if currency != 'USD':
                     question = f'{currency} {amount} in dollars'
-                    url = 'https://api.wolframalpha.com/v1/result?i=' + \
-                    f'{quote(question)}&appid={self.client.config["wolfram_key"]}'
+                    url = f'https://api.wolframalpha.com/v1/result?i={quote(question)}&appid={self.client.config["wolfram_key"]}'
+
                     async with self.client.session.get(url) as response:
                         answer = await response.text()
                     dollar_value = answer.split(' ')[1]
@@ -357,18 +357,19 @@ class Stream(commands.Cog, name='Stream'):
                 continue
 
             message_text = msg['snippet']['textMessageDetails']['messageText']
-            prefix_len = 0
-            for prefix in self.PREFIXES:
-                if message_text.lower().startswith(prefix):
-                    prefix_len = len(prefix)
-                    break
-            if not prefix_len:
-                continue
-            await self.stage_question(
-                message_text[prefix_len:],
-                author_name,
-                author_image
-            )
+            if prefix_len := next(
+                (
+                    len(prefix)
+                    for prefix in self.PREFIXES
+                    if message_text.lower().startswith(prefix)
+                ),
+                0,
+            ):
+                await self.stage_question(
+                    message_text[prefix_len:],
+                    author_name,
+                    author_image
+                )
     # ----------------------------------------------
 
     def cog_unload(self):

@@ -52,12 +52,7 @@ class PythonMailingList(Cog):
         state_json = json.loads(STATE_JSON.read_text())
         mails_sent = state_json.get(STATE_MSG_HASHES_KEY)
 
-        if not mails_sent:
-            return False
-        elif message_id_hash in mails_sent:
-            return True
-        else:
-            return False
+        return bool(mails_sent and message_id_hash in mails_sent)
 
     @command(hidden=True)
     async def pythonmail(self, ctx, maillist: str):
@@ -164,11 +159,14 @@ class PythonMailingList(Cog):
 
                 embed = discord.Embed(
                     title=email_information["subject"],
-                    description=content[:1000] + "..." if len(content) > 1000 else content,
+                    description=f"{content[:1000]}..."
+                    if len(content) > 1000
+                    else content,
                     timestamp=date_mail,
                     url=link,
                     colour=next(COLOURS),
                 )
+
                 embed.set_author(
                     name=f"{email_information['sender_name']} ({email_information['sender']['address']})",
                     url=MAILMAN_PROFILE_URL.format(

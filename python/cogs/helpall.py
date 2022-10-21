@@ -51,7 +51,7 @@ class myHelpCommand(HelpCommand):
 
         def get_category(command):
             cog = command.cog
-            return cog.qualified_name + ':' if cog is not None else 'Help:'
+            return f'{cog.qualified_name}:' if cog is not None else 'Help:'
 
         filtered = await self.filter_commands(
             bot.commands,
@@ -68,7 +68,7 @@ class myHelpCommand(HelpCommand):
                 entries = ''
                 while len(cmds) > 0:
                     entries += self.spacer
-                    entries += ' | '.join([cmd.name for cmd in cmds[0:8]])
+                    entries += ' | '.join([cmd.name for cmd in cmds[:8]])
                     cmds = cmds[8:]
                     entries += '\n' if cmds else ''
             self.paginator.append((category, entries))
@@ -81,12 +81,12 @@ class myHelpCommand(HelpCommand):
                 'No public commands in this cog. Try again with felix helpall.'
             )
             return
-        category = f'▼ {cog.qualified_name}'
         entries = '\n'.join(
-            self.spacer +
-            f'**{command.name}** → {command.short_doc or command.description}'
+            f'{self.spacer}**{command.name}** → {command.short_doc or command.description}'
             for command in filtered
         )
+
+        category = f'▼ {cog.qualified_name}'
         self.paginator.append((category, entries))
         await self.send_pages(footer=True)
 
@@ -99,9 +99,10 @@ class myHelpCommand(HelpCommand):
             return
         category = f'**{group.name}** - {group.description or group.short_doc}'
         entries = '\n'.join(
-            self.spacer + f'**{command.name}** → {command.short_doc}'
+            f'{self.spacer}**{command.name}** → {command.short_doc}'
             for command in filtered
         )
+
         self.paginator.append((category, entries))
         await self.send_pages(footer=True)
 

@@ -177,7 +177,7 @@ class SpamBlocker(commands.Cog, name='Spam'):
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
             self.spam_dict = None
-        await ctx.send(f'```✅ Spam Database reinitialized!```')
+        await ctx.send('```✅ Spam Database reinitialized!```')
 
 
     @spam.command(
@@ -186,7 +186,7 @@ class SpamBlocker(commands.Cog, name='Spam'):
     )
     async def add_spam(self, ctx, *args):
         """Add a spam link to automatically jail a user if posted"""
-        regex = ' '.join((x for x in args))
+        regex = ' '.join(args)
         member = ctx.message.author
         async with async_session() as db:
             async with db.begin():
@@ -202,9 +202,10 @@ class SpamBlocker(commands.Cog, name='Spam'):
 
                 embed = Embed(
                     color=0x13DC51,
-                    title=f'New Phishing Rule Added',
+                    title='New Phishing Rule Added',
                     description=f'```✅ {regex}```',
                 )
+
                 embed.set_footer(
                     text=member.name,
                     icon_url=member.display_avatar
@@ -248,7 +249,7 @@ class SpamBlocker(commands.Cog, name='Spam'):
     )
     async def update_regex_rule(self, ctx, _id, *args):
         """Update an existing spam rule by rule ID"""
-        regex = ' '.join((x for x in args))
+        regex = ' '.join(args)
         member = ctx.message.author
         async with async_session() as db:
             async with db.begin():
@@ -283,7 +284,7 @@ class SpamBlocker(commands.Cog, name='Spam'):
                 NUM_LEN = 25
                 all_spam = [f'  {row.id} | {row.regex}' if row.id < 10 else f' {row.id} | {row.regex}' for row in res]
                 response = []
-                for _ in range(len(all_spam)):
+                for item in all_spam:
                     response.append('\n'.join(all_spam[NUM_SPAM - NUM_LEN:NUM_SPAM]))
                     NUM_SPAM += NUM_LEN
                 for block in response:
@@ -346,7 +347,7 @@ class SpamBlocker(commands.Cog, name='Spam'):
                 NUM_LEN = 10
                 all_spammers = [f' {row.id} | {await self.client.fetch_user(row.member)} | {row.regex}' for row in rows]
                 response = []
-                for _ in range(len(all_spammers)):
+                for all_spammer in all_spammers:
                     response.append('\n'.join(all_spammers[NUM_SPAM - NUM_LEN:NUM_SPAM]))
                     NUM_SPAM += NUM_LEN
                 for block in response:

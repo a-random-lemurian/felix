@@ -112,10 +112,14 @@ async def on_error(event_method, *args, **kwargs):
     overridden to have a different implementation.
     Check :func:`~discord.on_error` for more details.
     """
-    print('Default Handler: Ignoring exception in {}'.format(event_method), file=sys.stderr)
+    print(
+        f'Default Handler: Ignoring exception in {event_method}',
+        file=sys.stderr,
+    )
+
     traceback.print_exc()
     # --------------- custom code below -------------------------------
-    await client.log_error(sys.exc_info()[1], 'DEFAULT HANDLER:' + event_method)
+    await client.log_error(sys.exc_info()[1], f'DEFAULT HANDLER:{event_method}')
 
 
 @client.event

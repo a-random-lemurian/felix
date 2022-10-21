@@ -71,7 +71,7 @@ class Jail(commands.Cog, name='Jail'):
         # Task that will remove users from the naughty list if they behaved for
         # 15 minutes - will also clear self.history to not let it get too big
         self.clear_naughty_list.start()
-        self.acceptance_pending = dict()
+        self.acceptance_pending = {}
 
     async def cog_check(self, ctx):
         return self.client.user_is_admin(ctx.author)
@@ -191,13 +191,13 @@ class Jail(commands.Cog, name='Jail'):
     # ----------------------------------------------
     @commands.Cog.listener()
     async def on_message(self, msg):
-        member = msg.author
         if msg.author.bot:
             # Dont run on any bot messages
             return
         if isinstance(msg.channel, DMChannel):
             # Ignore DM
             return
+        member = msg.author
         if self.client.user_is_admin(member):
             # Dont jail friends on after adding a new spam link
             return
@@ -224,10 +224,9 @@ class Jail(commands.Cog, name='Jail'):
                     # Warn the user and add him to the naughty list
                     # If he is not on the naughty list yet
                     await msg.channel.send(
-                        f'Hey {member.mention}, you are sending too many '
-                        + 'messages. This is a warning! If you keep '
-                        + 'this up you will be jailed.'
+                        f'Hey {member.mention}, you are sending too many messages. This is a warning! If you keep this up you will be jailed.'
                     )
+
                     self.naughty[uid] = now
                     # "Reset" his history so he doesn't get jailed immediately
                     # on the 11th message
@@ -270,10 +269,10 @@ class Jail(commands.Cog, name='Jail'):
             return
 
         pending = self.acceptance_pending[msg.id]
-        if not user.id in pending.users:
+        if user.id not in pending.users:
             return
 
-        if not reaction.emoji == '✅':
+        if reaction.emoji != '✅':
             return
 
         await self.release_from_jail(user)
@@ -418,10 +417,12 @@ class Jail(commands.Cog, name='Jail'):
     @tasks.loop(seconds=SPAM_NAUGHTY_CHECK_INTERVAL)
     async def clear_naughty_list(self):
         now = time.time()
-        newdict = {}
-        for k, v in self.naughty.items():
-            if now - v < SPAM_NAUGHTY_DURATION:
-                newdict[k] = v
+        newdict = {
+            k: v
+            for k, v in self.naughty.items()
+            if now - v < SPAM_NAUGHTY_DURATION
+        }
+
         self.naughty = newdict
         self.history = {}
 

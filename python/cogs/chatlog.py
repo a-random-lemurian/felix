@@ -26,7 +26,7 @@ class ChatLog(commands.Cog, name='Chat Log'):
         if isinstance(msg.channel, DMChannel):
             # Don't log DMs
             return
-        if not msg.channel.guild.id == self.client.main_guild.id:
+        if msg.channel.guild.id != self.client.main_guild.id:
             # Don't log messages on servers other than the main server
             return
         paginator = [
@@ -40,7 +40,7 @@ class ChatLog(commands.Cog, name='Chat Log'):
         self.logfile.flush()
 
         # send chat message to emkc
-        if not msg.channel.guild.id == 473161189120147456:
+        if msg.channel.guild.id != 473161189120147456:
             # prevent querying the emkc api if it's not felix
             return
 
