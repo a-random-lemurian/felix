@@ -38,6 +38,13 @@ class SpamDAL():
         )
         return query.scalars().all()
 
+    async def search_for_spam(self, query):
+        """Return all spam in database matching a given search term"""
+        query = await self.db_session.execute(
+            select(Spam).filter(Spam.regex.like(f'%{query}%'))
+        )
+        return query.scalars().all()
+
     async def spam_by_id(self, id: str):
         """Return spam rule by its ID"""
         query = await self.db_session.execute(
