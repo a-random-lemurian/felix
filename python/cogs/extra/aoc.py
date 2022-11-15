@@ -19,7 +19,7 @@ from discord.ext import commands, tasks
 
 # pylint: disable=E1101
 
-API_URL = 'https://adventofcode.com/2021/leaderboard/private/view/208847.json'
+API_URL = 'https://adventofcode.com/2022/leaderboard/private/view/208847.json'
 AOC_CHANNEL = 778324114213175323
 INTERVAL = 120
 
@@ -33,7 +33,9 @@ KNOWN_USERS = {
     '962475': 'dv_man',
     '419680': 'RuskyHacker',
     '1155906': 'T2',
-    }
+}
+
+
 class AdventOfCode(commands.Cog, name='Advent of Code'):
     def __init__(self, client):
         self.client = client
@@ -124,7 +126,7 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
 
         # Delete previous message
         for msg in self.last_msgs:
-                await msg.delete()
+            await msg.delete()
 
         self.last_msgs = []
 
@@ -196,23 +198,27 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
         Every day at `00:00 EST (05:00 UTC)` a new puzzle is released.
         When you log into the site you will be given a personalized puzzle input and every puzzle consists of 2 parts. The first part is usually a bit simpler - the second part often expands the problem so it can't simply be brute forced or guessed.
 
-        I encourage you to read more about it on [the official homepage](https://adventofcode.com/2021/about).
+        I encourage you to read more about it on [the official homepage](https://adventofcode.com/2022/about).
 
         **This channel** will be used to discuss the puzzles.
         I recommend you only come here once you have solved the puzzle for the day or if you really need help to figure it out.
 
         **Leaderboards**
-        There is a [global leaderboard](https://adventofcode.com/2021/leaderboard) which will reward the first person to solve a given puzzle part with 100 points. The second fastest will get 99 and so on.
+        There is a [global leaderboard](https://adventofcode.com/2022/leaderboard) which will reward the first person to solve a given puzzle part with 100 points. The second fastest will get 99 and so on.
         This global Leaderboard is usually very competitive and rather hard to get placed on.
         (Most of the time, all points for a puzzle will be gone after 5-30 minutes).
-        This is why we have created a [private leaderboard](https://adventofcode.com/2021/leaderboard/private/view/208847).
-        You can join it with the code `208847-9f5fc5f3` and it will track the amount of stars everyone has.
+        This is why we have created a [private leaderboard](https://adventofcode.com/2022/leaderboard/private/view/208847).
+        You can join it with the code `208847-c925c078`.
+        **Users that did not collect at least 1 Star** last year have been removed from the leaderboard.
 
-        **Important:** The goal of this should not be to solve it as fast as possible.
-        If you are new to programming, you might get stuck on some challenges.
+        **Important:** If you are new to programming, then the goal of this should not be to solve it as fast as possible.
+        Don't be surprised if you get stuck on some challenges.
         I encourage you to try every puzzle without help for at least 30 minutes. When I started doing these puzzles, some took me multiple hours to solve.
 
-        **If you want to prepare a bit** try to solve some [past challenges](https://adventofcode.com/2020/events)."""
+        **If you want to prepare a bit** try to solve some [past challenges](https://adventofcode.com/2021/events).
+
+        **Names** for the notifications sent in this channel are taken from adventofcode.com but can be customized.
+        If your AOC name is different from your discord name, please contact an EM staff member."""
 
         embed = Embed(
             title='Advent of Code',
