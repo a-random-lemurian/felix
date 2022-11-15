@@ -296,6 +296,27 @@ class SpamBlocker(commands.Cog, name='Spam'):
 
 
     @spam.command(
+        name='search',
+        aliases=['find']
+    )
+    async def spam_search(self, ctx, query):
+        """Search the spam list"""
+        async with async_session() as db:
+            async with db.begin():
+                scd = SpamDAL(db)
+                res = await scd.search_for_spam(query)
+                NUM_SPAM = 25
+                NUM_LEN = 25
+                all_spam = [f'  {row.id} | {row.regex}' if row.id < 10 else f' {row.id} | {row.regex}' for row in res]
+                response = []
+                for _ in range(len(all_spam)):
+                    response.append(self.make_spam_list(NUM_SPAM, NUM_LEN, all_spam))
+                    NUM_SPAM += NUM_LEN
+                for block in response:
+                    await ctx.send(f'```{"".join(block)}```') if len(block) > 0 else None
+
+
+    @spam.command(
         name='who',
         aliases=['w']
     )
