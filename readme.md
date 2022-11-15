@@ -1,4 +1,6 @@
 # Felix
+**Warning**: This `lem-fork` branch is Lemuria's fork branch of the bot. Please do not merge this branch into main. Thank you.
+
 Felix Discord Bot
 
 ## Getting started
