@@ -150,27 +150,26 @@ class General(commands.Cog, name='General'):
         if isinstance(msg.channel, DMChannel):
             return
 
-        if re.search(r'(?i).*what a twist.*', msg.content):
-            await msg.channel.send('` - directed by M. Night Shyamalan.`')
+        message_responses = [
+            [r'(?i).*what a twist.*',                       '` - directed by M. Night Shyamalan.`'],
+            [r'(?i)(?:the|this) (?:current )?year is '+
+             r'(?:almost |basically )'+
+             r'?(?:over|done|finished)',                   self.get_year_string()],
+            [r'(?i)send bobs and vagene',                  '😏 *sensible chuckle*'],
+            [r'(?i)^(?:hi|what\'s up|yo|hey|hello) felix', 'hello'],
+            [r'(?i)^html is a programming language',       'no it\'s not, don\'t be silly'],
+            [r'(?i)^you wanna fight, felix\?',             'bring it on pal (╯°□°）╯︵ ┻━┻'],
+            [r'(?i)^arrays start at 0',                    'arrays definitely start at 0'],
+            [r'(?i)^arrays start at 1',                    'arrays do not start at 1, they start at 0'],
+            [r'(?i)^felix meow',                           'ฅ^•ﻌ•^ฅ'],
+            [r'(?i)^felix what(?:\'s| is) the answer to'+
+             r' life,? the universe and everything',       '42']
+        ]
 
-        if re.search(
-            r'(?i)(?:the|this) (?:current )?year is '
-            + r'(?:almost |basically )?(?:over|done|finished)',
-            msg.content
-        ):
-            await msg.channel.send(self.get_year_string())
+        for response in message_responses:
+            if (re.search(response[0])):
+                await msg.channel.send(response[1])
 
-        if re.search(
-            r'(?i)send bobs and vagene',
-            msg.content
-        ):
-            await msg.channel.send('😏 *sensible chuckle*')
-
-        if re.search(
-            r'(?i)^(?:hi|what\'s up|yo|hey|hello) felix',
-            msg.content
-        ):
-            await msg.channel.send('hello')
 
         if re.search(
             r'(?i)^felix should (?:i|he|she|they|we|<@!?\d+>)',
@@ -181,42 +180,6 @@ class General(commands.Cog, name='General'):
             else:
                 response = 'the answer I am getting from my entropy is: No.'
             await msg.channel.send(response)
-
-        if re.search(
-            r'(?i)^html is a programming language',
-            msg.content
-        ):
-            await msg.channel.send('no it\'s not, don\'t be silly')
-
-        if re.search(
-            r'(?i)^you wanna fight, felix\?',
-            msg.content
-        ):
-            await msg.channel.send('bring it on pal (╯°□°）╯︵ ┻━┻')
-
-        if re.search(
-            r'(?i)^arrays start at 0',
-            msg.content
-        ):
-            await msg.channel.send('arrays definitely start at 0')
-
-        if re.search(
-            r'(?i)^arrays start at 1',
-            msg.content
-        ):
-            await msg.channel.send('arrays do not start at 1, they start at 0')
-
-        if re.search(
-            r'(?i)^felix meow',
-            msg.content
-        ):
-            await msg.channel.send('ฅ^•ﻌ•^ฅ')
-
-        if re.search(
-            r'(?i)^felix what(?:\'s| is) the answer to life,? the universe and everything',
-            msg.content
-        ):
-            await msg.channel.send('42')
 
         if match := self.re_convert.search(msg.content):
             unit_aliases = {
