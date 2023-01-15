@@ -307,15 +307,18 @@ class General(commands.Cog, name='General'):
     # This is a Lemurian Felix command. Please do not merge this into main. You
     # may only merge this to the lem-fork branch.
     @commands.command(
-        name='anne',
-        aliases=['annehidalgo', 'hidalgo']
+        name='anne'
     )
-    async def anne_hidalgo(self, ctx):
-        """Post image of Anne Hidalgo"""
-        image = "https://upload.wikimedia.org/wikipedia/commons/7/73/Anne_Hidalgo_%2847547509301%29.jpg"
+    async def anne(self, ctx):
+        """Post image of someone named Anne"""
+        images = [
+            "https://upload.wikimedia.org/wikipedia/commons/7/73/Anne_Hidalgo_%2847547509301%29.jpg"
+            "https://upload.wikimedia.org/wikipedia/commons/5/55/Anne_Rice.jpg"
+            "https://upload.wikimedia.org/wikipedia/commons/b/b3/Anne_Hathaway_for_AHC.png"
+        ]
         await ctx.typing()
         await ctx.send(
-            image
+            random.choice(images)
         )
 
     @commands.command(
