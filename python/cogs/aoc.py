@@ -33,6 +33,9 @@ KNOWN_USERS = {
     '962475': 'dv_man',
     '419680': 'RuskyHacker',
     '1155906': 'T2',
+    '2464982': 'hegehog',
+    '2100497': 'Aetheridon',
+    '2537005': 'mizatorian',
 }
 
 
@@ -87,11 +90,13 @@ class AdventOfCode(commands.Cog, name='Advent of Code'):
                 if puzzle not in previous_stats:
                     day, pzl = puzzle.split('-')
                     time = int(new_stats[day][pzl]['get_star_ts'])
+                    day1_time = int(new_stats[day]['1']['get_star_ts']) if pzl == '2' else 0
                     msg.append((
                         time,
                         f"#{data['name'].replace(' ', '_')} " +
-                        f"solved: [{day} - {pzl}] " +
-                        f"at [{datetime.fromtimestamp(time).strftime('%H:%M:%S')} UTC]"
+                        f"solved [{day} - {pzl}] " +
+                        f"at [{datetime.fromtimestamp(time).strftime('%H:%M:%S')} UTC] " +
+                        (f"[Δ {timedelta(seconds=time - day1_time)}]" if pzl == '2' else "")
                     ))
         if msg:
             await channel.send(
