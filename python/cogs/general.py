@@ -312,8 +312,8 @@ class General(commands.Cog, name='General'):
     async def anne(self, ctx):
         """Post image of someone named Anne"""
         images = [
-            "https://upload.wikimedia.org/wikipedia/commons/7/73/Anne_Hidalgo_%2847547509301%29.jpg"
-            "https://upload.wikimedia.org/wikipedia/commons/5/55/Anne_Rice.jpg"
+            "https://upload.wikimedia.org/wikipedia/commons/7/73/Anne_Hidalgo_%2847547509301%29.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/5/55/Anne_Rice.jpg",
             "https://upload.wikimedia.org/wikipedia/commons/b/b3/Anne_Hathaway_for_AHC.png"
         ]
         await ctx.typing()
